@@ -22,8 +22,8 @@ def login_view(request):
             return redirect('event-list')
         else:
             messages.error(request, "Nom d'utilisateur ou mot de passe incorrect.")
-            
-    return render(request, 'users/login.html')
+
+    return render(request, 'users/login.html', {'roles': User.ROLE_CHOICES})
 
 def register_view(request):
     if request.user.is_authenticated:

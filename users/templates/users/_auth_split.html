@@ -1,0 +1,89 @@
+{# Partial split-screen reversible : login + register.            #}
+{# Variable attendue : active = 'login' (defaut) ou 'register'.    #}
+<div class="auth-split {% if active == 'register' %}mode-register{% endif %}" id="authSplit">
+
+    <!-- Cote marque -->
+    <div class="auth-brand">
+        <div class="auth-brand-logo">EVENTPRO<span>CI</span></div>
+        <div class="auth-brand-diamond">&#9670;</div>
+        <div class="auth-brand-divider"></div>
+        <p class="auth-brand-slogan">Programme tes kiffements en chap.</p>
+    </div>
+
+    <!-- Cote formulaires -->
+    <div class="auth-forms">
+
+        <!-- Formulaire de connexion -->
+        <div class="auth-form login-form">
+            <h1>Se Connecter</h1>
+            <p class="auth-subtitle">Heureux de te revoir. Accede a tes evenements.</p>
+
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="login-username">Nom d'utilisateur</label>
+                    <input type="text" name="username" id="login-username" class="form-control" required placeholder="Ex: JeanDupont">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Mot de passe</label>
+                    <input type="password" name="password" id="login-password" class="form-control" required placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.8rem;">Connexion</button>
+            </form>
+
+            <p class="auth-switch">
+                Pas encore de compte ? <a data-auth-toggle>Creer un compte</a>
+            </p>
+        </div>
+
+        <!-- Formulaire d'inscription -->
+        <div class="auth-form register-form">
+            <h1>Creer un Compte</h1>
+            <p class="auth-subtitle">Rejoins EVENTPRO CI et vis l'evenement.</p>
+
+            <form method="post" action="{% url 'register' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="reg-username">Nom d'utilisateur</label>
+                    <input type="text" name="username" id="reg-username" class="form-control" required placeholder="Ex: JeanDupont">
+                </div>
+                <div class="form-group">
+                    <label for="reg-email">Adresse Email</label>
+                    <input type="email" name="email" id="reg-email" class="form-control" required placeholder="email@exemple.ci">
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">Mot de passe</label>
+                    <input type="password" name="password" id="reg-password" class="form-control" required placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+                </div>
+                <div class="form-group">
+                    <label for="reg-role">Quel est votre profil ?</label>
+                    <select name="role" id="reg-role" class="form-control">
+                        {% for value, display in roles %}
+                            {% if value != 'ADMIN' %}
+                                <option value="{{ value }}">{{ display }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.8rem;">S'inscrire</button>
+            </form>
+
+            <p class="auth-switch">
+                Deja inscrit ? <a data-auth-toggle>Se connecter</a>
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    (function () {
+        var split = document.getElementById('authSplit');
+        document.querySelectorAll('[data-auth-toggle]').forEach(function (el) {
+            el.addEventListener('click', function (e) {
+                e.preventDefault();
+                split.classList.toggle('mode-register');
+            });
+        });
+    })();
+</script>

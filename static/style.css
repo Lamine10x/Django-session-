@@ -494,6 +494,174 @@ footer p strong { color: var(--accent); }
     opacity: 0.5;
 }
 
+/* ============================================================
+   Auth — Split Screen plein ecran (login / register reversible)
+   ============================================================ */
+.auth-body { overflow: hidden; }
+
+.auth-split {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+    background: var(--bg-card);
+}
+
+/* Les deux moities glissent l'une devant l'autre (effet reversible) */
+.auth-brand,
+.auth-forms {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    transition: transform 0.75s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.auth-brand { left: 0; }
+.auth-forms { left: 50%; }
+
+/* Mode inscription : on inverse les cotes */
+.auth-split.mode-register .auth-brand  { transform: translateX(100%); }
+.auth-split.mode-register .auth-forms  { transform: translateX(-100%); }
+
+/* Cote marque */
+.auth-brand {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 3rem 2.5rem;
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(212,175,55,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 90%, rgba(6,78,59,0.25) 0%, transparent 55%),
+        linear-gradient(150deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+}
+
+.auth-brand::before {
+    content: '';
+    position: absolute;
+    inset: 1.6rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    pointer-events: none;
+}
+
+.auth-brand-logo {
+    font-family: 'Perpetua', 'Perpetua Titling MT', 'Cormorant Garamond', Georgia, serif;
+    font-size: 4.2rem;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(212,175,55,0.45);
+    margin-bottom: 0.4rem;
+}
+
+.auth-brand-logo span { display: block; font-size: 1.5rem; letter-spacing: 8px; color: var(--text-secondary); }
+
+.auth-brand-diamond {
+    font-size: 1.5rem;
+    color: var(--accent);
+    opacity: 0.8;
+    margin-bottom: 1.4rem;
+}
+
+.auth-brand-slogan {
+    font-family: 'Perpetua', 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-size: 1.65rem;
+    color: var(--accent-light);
+    max-width: 360px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.auth-brand-divider {
+    width: 70px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    margin: 1.6rem 0;
+    opacity: 0.7;
+}
+
+/* Cote formulaire */
+.auth-forms {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2.5rem;
+    background: var(--bg-card);
+    color: var(--text-card-primary);
+    overflow-y: auto;
+}
+
+.auth-form {
+    width: 100%;
+    max-width: 380px;
+    animation: fadeIn 0.5s ease;
+}
+
+/* Bascule d'affichage des formulaires */
+.auth-form.register-form { display: none; }
+.auth-split.mode-register .auth-form.login-form { display: none; }
+.auth-split.mode-register .auth-form.register-form { display: block; }
+
+.auth-forms h1 {
+    color: var(--text-card-primary);
+    text-shadow: none;
+    font-size: 2.1rem;
+    margin-bottom: 0.4rem;
+}
+
+.auth-forms h1::after { display: none; }
+
+.auth-subtitle {
+    color: var(--text-card-secondary);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 1.6rem;
+    font-size: 0.95rem;
+    color: var(--text-card-secondary);
+}
+
+.auth-switch a { color: var(--primary); font-weight: 700; cursor: pointer; }
+.auth-switch a:hover { color: var(--primary-hover); }
+
+/* Empilement mobile : plus de glissement, on bascule par affichage */
+@media (max-width: 768px) {
+    .auth-body { overflow: auto; }
+    .auth-split { display: flex; flex-direction: column; min-height: 100vh; }
+    .auth-brand,
+    .auth-forms {
+        position: static;
+        width: 100%;
+        height: auto;
+        transform: none !important;
+    }
+    .auth-brand { min-height: 38vh; padding: 2.5rem 1.5rem; }
+    .auth-brand-logo { font-size: 2.8rem; letter-spacing: 2px; }
+    .auth-brand-slogan { font-size: 1.3rem; }
+    .auth-forms { flex: 1; padding: 2.5rem 1.6rem; }
+}
+
+/* Alertes flottantes au-dessus du split plein ecran */
+.auth-alerts {
+    position: fixed;
+    top: 1.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 300;
+    width: 100%;
+    max-width: 460px;
+    padding: 0 1rem;
+}
+
 /* Hero */
 .hero { text-align: center; padding: 4rem 2rem; position: relative; }
 .hero h1 { font-size: 3.2rem; margin-bottom: 1rem; }
