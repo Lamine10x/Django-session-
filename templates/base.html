@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EVENTPRO CI{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="{% url 'event-list' %}" class="logo">EVENTPRO CI</a>
+            <ul class="nav-links">
+                <li><a href="{% url 'event-list' %}">Événements</a></li>
+                {% if user.is_authenticated %}
+                    {% if user.is_organizer_user or user.is_admin_user %}
+                        <li><a href="{% url 'organizer-dashboard' %}">Dashboard Organisateur</a></li>
+                        <li><a href="{% url 'event-create' %}">Créer Événement</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'user-reservations' %}">Mes Réservations</a></li>
+                    <li><span style="color: var(--text-primary); font-weight: 500;">@{{ user.username }}</span></li>
+                    <li><a href="{% url 'logout' %}" class="btn btn-secondary" style="padding: 0.4rem 1rem;">Déconnexion</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Connexion</a></li>
+                    <li><a href="{% url 'register' %}" class="btn btn-primary" style="padding: 0.4rem 1rem;">S'inscrire</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    {% if messages %}
+        <div class="alerts-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 EVENTPRO CI — Licence 2 Développement Web Avancé. Tous droits réservés.</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

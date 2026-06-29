@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Tableau de Bord - EVENTPRO CI{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem;">Tableau de Bord Organisateur</h1>
+
+{% if events_stats %}
+    <div style="display: flex; flex-direction: column; gap: 3rem;">
+        {% for stat in events_stats %}
+            <div class="card" style="margin-bottom: 0;">
+                <!-- Event Title & Status -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1.25rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">{{ stat.event.title }}</h2>
+                        <small style="color: var(--text-secondary);">📅 {{ stat.event.date|date:"d M Y - H:i" }} | 📍 {{ stat.event.location }}</small>
+                    </div>
+                    <div>
+                        <span class="badge badge-{{ stat.event.status|lower }}">{{ stat.event.get_status_display }}</span>
+                        <a href="{% url 'event-detail' stat.event.pk %}" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem; margin-left: 0.5rem;">Page publique</a>
+                    </div>
+                </div>
+
+                <!-- Stats summary columns -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
+                        <span style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 500;">Billets Vendus</span>
+                        <strong style="font-size: 2rem; color: var(--primary);">{{ stat.total_sold }}</strong>
+                        <span style="display: block; font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">sur {{ stat.event.max_capacity }} places max</span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center;">
+                        <span style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 500;">Recettes Générées</span>
+                        <strong style="font-size: 2rem; color: var(--success);">{{ stat.revenue }} FCFA</strong>
+                    </div>
+                </div>
+
+                <!-- Categories details -->
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-primary);">Détails des catégories</h3>
+                    {% if stat.ticket_types %}
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;">
+                            {% for tt in stat.ticket_types %}
+                                <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; font-size: 0.9rem;">
+                                    <strong style="color: var(--text-primary); display: block; margin-bottom: 0.25rem;">{{ tt.name }}</strong>
+                                    <span style="color: var(--accent); font-weight: 600; display: block; margin-bottom: 0.5rem;">{{ tt.price }} FCFA</span>
+                                    <div style="display: flex; justify-content: space-between; color: var(--text-secondary); font-size: 0.8rem;">
+                                        <span>Vendus:</span>
+                                        <strong>{{ tt.sold_count }} / {{ tt.quota }}</strong>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p style="font-size: 0.9rem; font-style: italic;">Aucune catégorie de billet configurée.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Participants list -->
+                <div>
+                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-primary);">Liste des réservations / participants ({{ stat.reservations.count }})</h3>
+                    {% if stat.reservations %}
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Participant</th>
+                                        <th>Catégorie</th>
+                                        <th>Code Unique (UUID)</th>
+                                        <th>Statut Paiement</th>
+                                        <th>Statut Réservation</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for res in stat.reservations %}
+                                        <tr>
+                                            <td style="color: var(--text-primary); font-weight: 500;">@{{ res.user.username }}</td>
+                                            <td>{{ res.ticket_type.name }}</td>
+                                            <td><code style="font-size: 0.8rem; color: var(--accent);">{{ res.ticket_code }}</code></td>
+                                            <td>
+                                                <span class="badge {% if res.payment_status == 'PAID' %}badge-published{% else %}badge-draft{% endif %}">
+                                                    {{ res.get_payment_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge {% if res.status == 'CONFIRMED' %}badge-published{% else %}badge-cancelled{% endif %}">
+                                                    {{ res.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% if res.status == 'CONFIRMED' %}
+                                                    <form method="post" action="{% url 'cancel-reservation' res.id %}">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="next" value="organizer-dashboard">
+                                                        <button type="submit" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; border-color: var(--danger); color: #f87171;" onclick="return confirm('Êtes-vous sûr de vouloir annuler le billet de @{{ res.user.username }} ?');">
+                                                            Annuler
+                                                        </button>
+                                                    </form>
+                                                {% else %}
+                                                    <span style="font-size: 0.8rem; color: var(--text-secondary); font-style: italic;">Annulé</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p style="font-size: 0.9rem; font-style: italic;">Aucun participant enregistré pour le moment.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card" style="text-align: center; padding: 4rem 2rem;">
+        <p>Vous n'avez créé aucun événement.</p>
+        <a href="{% url 'event-create' %}" class="btn btn-primary" style="margin-top: 1rem;">Créer votre premier événement</a>
+    </div>
+{% endif %}
+{% endblock %}

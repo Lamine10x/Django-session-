@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Événements - EVENTPRO CI{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1>Événements Disponibles</h1>
+    {% if user.is_authenticated and user.is_organizer_user or user.is_admin_user %}
+        <a href="{% url 'event-create' %}" class="btn btn-primary">+ Créer un Événement</a>
+    {% endif %}
+</div>
+
+{% if events %}
+    <div class="grid">
+        {% for event in events %}
+            <div class="card event-card">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <span class="badge badge-{{ event.status|lower }}">{{ event.get_status_display }}</span>
+                        <small style="color: var(--text-secondary);">Organisé par @{{ event.organizer.username }}</small>
+                    </div>
+                    <h2 style="font-size: 1.35rem; font-weight: 600; margin-bottom: 0.75rem;">{{ event.title }}</h2>
+                    <p style="font-size: 0.95rem; margin-bottom: 1.25rem;">{{ event.description|truncatewords:20 }}</p>
+                </div>
+                <div>
+                    <div class="event-meta">
+                        <span>📅 {{ event.date|date:"d M Y - H:i" }}</span>
+                        <span>📍 {{ event.location }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
+                        <span style="font-size: 0.9rem; color: var(--text-secondary);">Capacité: <strong>{{ event.max_capacity }} places</strong></span>
+                        <a href="{% url 'event-detail' event.pk %}" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">Détails</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card" style="text-align: center; padding: 4rem 2rem;">
+        <p style="font-size: 1.2rem; color: var(--text-secondary);">Aucun événement n'est disponible pour le moment.</p>
+        {% if user.is_authenticated and user.is_organizer_user or user.is_admin_user %}
+            <a href="{% url 'event-create' %}" class="btn btn-primary" style="margin-top: 1rem;">Créez le premier événement</a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

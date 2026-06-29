@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ event.title }} - EVENTPRO CI{% endblock %}
+
+{% block extra_head %}
+<style>
+    .websocket-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        color: #34d399;
+        font-size: 0.8rem;
+        padding: 0.3rem 0.75rem;
+        border-radius: 9999px;
+        font-weight: 500;
+        margin-left: 0.5rem;
+    }
+    .websocket-status.disconnected {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: #f87171;
+    }
+    .websocket-status .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: currentColor;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 2rem;">
+    <!-- Event header card -->
+    <div class="card" style="position: relative; overflow: hidden;">
+        <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+            <div>
+                <span id="event-badge" class="badge badge-{{ event.status|lower }}">{{ event.get_status_display }}</span>
+                <span id="ws-status-badge" class="websocket-status disconnected">
+                    <span class="dot"></span> <span class="status-text">Hors ligne</span>
+                </span>
+            </div>
+            {% if user.is_authenticated and user == event.organizer or user.is_admin_user %}
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="{% url 'event-edit' event.pk %}" class="btn btn-secondary" style="font-size: 0.9rem;">Modifier</a>
+                    {% if event.status == 'DRAFT' %}
+                        <a href="{% url 'event-status-change' event.pk 'PUBLISHED' %}" class="btn btn-primary" style="font-size: 0.9rem;">Publier</a>
+                    {% endif %}
+                    {% if event.status == 'PUBLISHED' %}
+                        <a href="{% url 'event-status-change' event.pk 'CANCELLED' %}" class="btn btn-danger" style="font-size: 0.9rem;">Annuler l'événement</a>
+                        <a href="{% url 'event-status-change' event.pk 'COMPLETED' %}" class="btn btn-secondary" style="font-size: 0.9rem; border-color: var(--success); color: #34d399;">Terminer</a>
+                    {% endif %}
+                    <a href="{% url 'ticket-type-create' event.pk %}" class="btn btn-primary" style="font-size: 0.9rem; background: linear-gradient(135deg, var(--accent), #aa00aa);">+ Catégorie de Billet</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <h1 id="event-title" style="margin-bottom: 1rem; font-size: 2.5rem; background: linear-gradient(135deg, var(--text-primary), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ event.title }}</h1>
+        
+        <div class="event-meta" style="margin-bottom: 2rem; font-size: 1rem; gap: 2rem;">
+            <span>📅 <strong>Date:</strong> <span id="event-date">{{ event.date|date:"d F Y à H:i" }}</span></span>
+            <span>📍 <strong>Lieu:</strong> <span id="event-location">{{ event.location }}</span></span>
+            <span>👥 <strong>Capacité:</strong> {{ event.max_capacity }} places max</span>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <h3 style="margin-bottom: 0.75rem; color: var(--text-primary); font-weight: 600;">Description de l'événement</h3>
+            <p style="font-size: 1.05rem; white-space: pre-line;">{{ event.description }}</p>
+        </div>
+    </div>
+
+    <!-- Billetterie section -->
+    <div class="card">
+        <h2 style="margin-bottom: 1.5rem; font-weight: 700; background: linear-gradient(135deg, var(--text-primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Billets & Réservations</h2>
+        
+        {% if ticket_types %}
+            <div class="grid">
+                {% for tt in ticket_types %}
+                    <div class="card" style="margin-bottom: 0; background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
+                        <div>
+                            <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-primary);">{{ tt.name }}</h3>
+                            <p style="font-size: 1.5rem; font-weight: 700; color: var(--primary); margin: 0.5rem 0;">{{ tt.price }} FCFA</p>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 1rem; color: var(--text-secondary);">
+                                <span>Disponibles:</span>
+                                <strong><span id="quota-remaining-{{ tt.id }}">{{ tt.remaining_tickets }}</span> / {{ tt.quota }}</strong>
+                            </div>
+                            
+                            {% if event.status == 'PUBLISHED' %}
+                                {% if user.is_authenticated %}
+                                    <form method="post" action="{% url 'book-ticket' tt.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 0.9rem; padding: 0.5rem;"
+                                            {% if tt.remaining_tickets <= 0 %}disabled style="background: var(--text-secondary); opacity: 0.5; cursor: not-allowed;"{% endif %}>
+                                            {% if tt.remaining_tickets <= 0 %}Complet{% else %}Réserver{% endif %}
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <a href="{% url 'login' %}" class="btn btn-secondary" style="width: 100%; font-size: 0.9rem; text-align: center; padding: 0.5rem;">Connectez-vous pour réserver</a>
+                                {% endif %}
+                            {% else %}
+                                <button class="btn btn-secondary" disabled style="width: 100%; font-size: 0.9rem; padding: 0.5rem; opacity: 0.5; cursor: not-allowed;">
+                                    Réservation fermée ({{ event.get_status_display }})
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 2rem; background: rgba(255,255,255,0.01); border-radius: 8px; border: 1px dashed var(--border-color); width: 100%;">
+                <p>Aucune catégorie de billet n'est définie pour cet événement.</p>
+                {% if user.is_authenticated and user == event.organizer %}
+                    <a href="{% url 'ticket-type-create' event.pk %}" class="btn btn-primary" style="margin-top: 1rem;">Ajouter une catégorie de billet</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const eventId = "{{ event.id }}";
+    const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+    const wsUrl = wsScheme + "://" + window.location.host + "/ws/event/" + eventId + "/";
+    
+    const wsStatusBadge = document.getElementById("ws-status-badge");
+    const wsStatusText = wsStatusBadge.querySelector(".status-text");
+    const eventBadge = document.getElementById("event-badge");
+
+    console.log("Connecting to WebSocket room at " + wsUrl);
+    const socket = new WebSocket(wsUrl);
+
+    socket.onopen = function(e) {
+        console.log("WebSocket connection established!");
+        wsStatusBadge.classList.remove("disconnected");
+        wsStatusText.textContent = "En direct";
+    };
+
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        console.log("WebSocket message received:", data);
+
+        if (data.type === "status_update") {
+            eventBadge.className = "badge badge-" + data.status.toLowerCase();
+            eventBadge.textContent = data.status_display;
+            setTimeout(() => { window.location.reload(); }, 1500);
+        } else if (data.type === "quota_update") {
+            data.tickets.forEach(ticket => {
+                const remainingElement = document.getElementById("quota-remaining-" + ticket.ticket_type_id);
+                if (remainingElement) {
+                    remainingElement.textContent = ticket.remaining;
+                    const form = remainingElement.closest('.card').querySelector('form');
+                    if (form) {
+                        const button = form.querySelector('button');
+                        if (button) {
+                            if (ticket.remaining <= 0) {
+                                button.disabled = true;
+                                button.style.background = 'var(--text-secondary)';
+                                button.style.opacity = '0.5';
+                                button.style.cursor = 'not-allowed';
+                                button.textContent = 'Complet';
+                            } else {
+                                button.disabled = false;
+                                button.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-hover))';
+                                button.style.opacity = '1';
+                                button.style.cursor = 'pointer';
+                                button.textContent = 'Réserver';
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    };
+
+    socket.onclose = function(e) {
+        console.log("WebSocket connection closed.", e);
+        wsStatusBadge.classList.add("disconnected");
+        wsStatusText.textContent = "Hors ligne";
+    };
+
+    socket.onerror = function(e) {
+        console.error("WebSocket error:", e);
+        wsStatusBadge.classList.add("disconnected");
+        wsStatusText.textContent = "Erreur";
+    };
+</script>
+{% endblock %}

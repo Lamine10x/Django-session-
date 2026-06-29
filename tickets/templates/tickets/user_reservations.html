@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Mes Réservations - EVENTPRO CI{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem;">Mes Billets Réservés</h1>
+
+{% if reservations %}
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        {% for res in reservations %}
+            <div class="card" style="margin-bottom: 0; padding: 1.5rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.5rem; background: {% if res.status == 'CANCELLED' %}rgba(239, 68, 68, 0.03){% else %}var(--bg-card){% endif %}; opacity: {% if res.status == 'CANCELLED' %}0.6{% else %}1{% endif %};">
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <span class="badge {% if res.status == 'CONFIRMED' %}badge-published{% else %}badge-cancelled{% endif %}" style="align-self: start;">
+                        {{ res.get_status_display }}
+                    </span>
+                    <h2 style="font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">{{ res.ticket_type.event.title }}</h2>
+                    <p style="font-size: 0.95rem; margin-bottom: 0;">Catégorie : <strong>{{ res.ticket_type.name }}</strong> | Prix : <strong>{{ res.ticket_type.price }} FCFA</strong></p>
+                    <small style="color: var(--text-secondary);">Date Event: {{ res.ticket_type.event.date|date:"d M Y - H:i" }} | Lieu: {{ res.ticket_type.event.location }}</small>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem;">
+                    <div style="text-align: right;">
+                        <small style="color: var(--text-secondary); display: block;">Code Billet (UUID)</small>
+                        <code style="font-size: 0.9rem; background: rgba(255,255,255,0.05); padding: 0.2rem 0.5rem; border-radius: 4px; color: var(--accent); border: 1px solid var(--border-color); font-family: monospace;">
+                            {{ res.ticket_code }}
+                        </code>
+                    </div>
+                    
+                    {% if res.status == 'CONFIRMED' and res.ticket_type.event.status == 'PUBLISHED' %}
+                        <form method="post" action="{% url 'cancel-reservation' res.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem; border-color: var(--danger); color: #f87171;" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?');">
+                                Annuler la réservation
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card" style="text-align: center; padding: 4rem 2rem;">
+        <p>Vous n'avez pas encore effectué de réservation de billets.</p>
+        <a href="{% url 'event-list' %}" class="btn btn-primary" style="margin-top: 1rem;">Parcourir les événements</a>
+    </div>
+{% endif %}
+{% endblock %}

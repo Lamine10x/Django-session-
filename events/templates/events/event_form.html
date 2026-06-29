@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if event %}Modifier: {{ event.title }}{% else %}Créer un Événement{% endif %} - EVENTPRO CI{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 2rem auto;">
+    <a href="{% if event %}{% url 'event-detail' event.pk %}{% else %}{% url 'event-list' %}{% endif %}" class="btn btn-secondary" style="margin-bottom: 1.5rem; font-size: 0.9rem;">&larr; Retour</a>
+    
+    <div class="card">
+        <h1 style="margin-bottom: 2rem; background: linear-gradient(135deg, var(--text-primary), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            {% if event %}Modifier l'événement{% else %}Créer un nouvel événement{% endif %}
+        </h1>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="title">Titre de l'événement</label>
+                <input type="text" name="title" id="title" class="form-control" required placeholder="Ex: Concert live..." value="{{ event.title|default:'' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea name="description" id="description" rows="5" class="form-control" required placeholder="Décrivez l'événement..." style="resize: vertical;">{{ event.description|default:'' }}</textarea>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label for="date">Date et Heure</label>
+                    <input type="datetime-local" name="date" id="date" class="form-control" required value="{% if event %}{{ event.date|date:'Y-m-d\TH:i' }}{% endif %}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="max_capacity">Capacité maximale (places)</label>
+                    <input type="number" name="max_capacity" id="max_capacity" class="form-control" required min="1" placeholder="Ex: 500" value="{{ event.max_capacity|default:'' }}">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="location">Lieu / Adresse</label>
+                <input type="text" name="location" id="location" class="form-control" required placeholder="Ex: Palais de la Culture, Treichville" value="{{ event.location|default:'' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="status">Statut</label>
+                <select name="status" id="status" class="form-control" {% if event and event.status in 'CANCELLED,COMPLETED' %}disabled{% endif %}>
+                    {% for val, display in statuses %}
+                        <option value="{{ val }}" {% if event and event.status == val %}selected{% endif %}>{{ display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.8rem;">
+                {% if event %}Enregistrer les modifications{% else %}Créer l'événement{% endif %}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
