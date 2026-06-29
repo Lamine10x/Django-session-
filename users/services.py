@@ -15,11 +15,12 @@ class UserService:
         if User.objects.filter(email=email).exists():
             raise ValidationError("Cet email est déjà enregistré.")
             
-        if role and role not in [User.ADMIN, User.ORGANIZER, User.PARTICIPANT]:
-            raise ValidationError("Rôle invalide spécifié.")
-            
+        # L'inscription publique est limitee a Organisateur et Participant.
+        # Le role ADMIN ne peut JAMAIS etre obtenu par auto-inscription.
         role = role or User.PARTICIPANT
-        
+        if role not in [User.ORGANIZER, User.PARTICIPANT]:
+            raise ValidationError("Rôle invalide. Seuls Organisateur et Participant sont autorisés à l'inscription.")
+
         user = User.objects.create_user(
             username=username,
             email=email,

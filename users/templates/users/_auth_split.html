@@ -28,6 +28,16 @@
                     <label for="login-password">Mot de passe</label>
                     <input type="password" name="password" id="login-password" class="form-control" required placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
                 </div>
+                <div class="form-group">
+                    <label for="login-role">Se connecter en tant que</label>
+                    <select name="role" id="login-role" class="form-control">
+                        {% for value, display in roles %}
+                            {% if value != 'ADMIN' %}
+                                <option value="{{ value }}">{{ display }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.8rem;">Connexion</button>
             </form>
 

@@ -14,9 +14,15 @@ def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        
+        selected_role = request.POST.get('role')
+
         user = authenticate(request, username=username, password=password)
         if user is not None:
+            # Les admins/superusers ne sont pas soumis au choix de role.
+            if selected_role and not user.is_admin_user() and user.role != selected_role:
+                messages.error(request, "Ce compte n'est pas associé au rôle sélectionné.")
+                return render(request, 'users/login.html', {'roles': User.ROLE_CHOICES})
+
             login(request, user)
             messages.success(request, f"Bienvenue, {user.username} !")
             return redirect('event-list')
