@@ -13,10 +13,39 @@ class Event(models.Model):
         (CANCELLED, 'Annulé'),
         (COMPLETED, 'Terminé'),
     ]
-    
+
+    CONCERT = 'CONCERT'
+    ONE_MAN_SHOW = 'ONE_MAN_SHOW'
+    MARATHON = 'MARATHON'
+    SPORT = 'SPORT'
+    CHARITY = 'CHARITY'
+    LEISURE = 'LEISURE'
+    CULINARY = 'CULINARY'
+
+    CATEGORY_CHOICES = [
+        (CONCERT, 'Concert'),
+        (ONE_MAN_SHOW, 'One Man Show'),
+        (MARATHON, 'Marathon'),
+        (SPORT, 'Tournoi sportif'),
+        (CHARITY, 'Charité'),
+        (LEISURE, 'Sortie détente'),
+        (CULINARY, 'Festival culinaire'),
+    ]
+
     title = models.CharField(max_length=200, verbose_name="Titre")
     description = models.TextField(verbose_name="Description")
-    date = models.DateTimeField(verbose_name="Date et heure de l'événement")
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        default=CONCERT,
+        verbose_name="Catégorie"
+    )
+    date = models.DateTimeField(verbose_name="Date et heure de début")
+    end_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Date et heure de fin"
+    )
     location = models.CharField(max_length=255, verbose_name="Lieu")
     max_capacity = models.PositiveIntegerField(verbose_name="Capacité maximale")
     organizer = models.ForeignKey(

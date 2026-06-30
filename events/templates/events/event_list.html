@@ -3,11 +3,19 @@
 {% block title %}Événements - EVENTPRO CI{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
     <h1>Événements Disponibles</h1>
     {% if user.is_authenticated and user.is_organizer_user or user.is_admin_user %}
         <a href="{% url 'event-create' %}" class="btn btn-primary">+ Créer un Événement</a>
     {% endif %}
+</div>
+
+<!-- Filtres par categorie -->
+<div class="category-filter">
+    <a href="{% url 'event-list' %}" class="category-chip {% if not selected_category %}active{% endif %}">Toutes</a>
+    {% for val, display in categories %}
+        <a href="?category={{ val }}" class="category-chip {% if selected_category == val %}active{% endif %}">{{ display }}</a>
+    {% endfor %}
 </div>
 
 {% if events %}
@@ -19,6 +27,7 @@
                         <span class="badge badge-{{ event.status|lower }}">{{ event.get_status_display }}</span>
                         <small style="color: var(--text-secondary);">Organisé par @{{ event.organizer.username }}</small>
                     </div>
+                    <span class="badge badge-category">{{ event.get_category_display }}</span>
                     <h2 style="font-size: 1.35rem; font-weight: 600; margin-bottom: 0.75rem;">{{ event.title }}</h2>
                     <p style="font-size: 0.95rem; margin-bottom: 1.25rem;">{{ event.description|truncatewords:20 }}</p>
                 </div>

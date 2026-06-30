@@ -38,6 +38,7 @@
         <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
             <div>
                 <span id="event-badge" class="badge badge-{{ event.status|lower }}">{{ event.get_status_display }}</span>
+                <span class="badge badge-category">{{ event.get_category_display }}</span>
                 <span id="ws-status-badge" class="websocket-status disconnected">
                     <span class="dot"></span> <span class="status-text">Hors ligne</span>
                 </span>
@@ -60,7 +61,8 @@
         <h1 id="event-title" style="margin-bottom: 1rem; font-size: 2.5rem; background: linear-gradient(135deg, var(--text-primary), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ event.title }}</h1>
         
         <div class="event-meta" style="margin-bottom: 2rem; font-size: 1rem; gap: 2rem;">
-            <span>📅 <strong>Date:</strong> <span id="event-date">{{ event.date|date:"d F Y à H:i" }}</span></span>
+            <span>📅 <strong>Début:</strong> <span id="event-date">{{ event.date|date:"d F Y à H:i" }}</span></span>
+            {% if event.end_date %}<span>🏁 <strong>Fin:</strong> {{ event.end_date|date:"d F Y à H:i" }}</span>{% endif %}
             <span>📍 <strong>Lieu:</strong> <span id="event-location">{{ event.location }}</span></span>
             <span>👥 <strong>Capacité:</strong> {{ event.max_capacity }} places max</span>
         </div>

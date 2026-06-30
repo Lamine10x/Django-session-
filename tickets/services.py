@@ -1,4 +1,6 @@
 from django.db import transaction
+from django.db.models import Q, F
+from django.db.models.functions import Coalesce
 from django.core.exceptions import ValidationError
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -18,6 +20,44 @@ class TicketService:
 
             if event.status != Event.PUBLISHED:
                 raise ValidationError("Réservation impossible : l'événement n'est pas publié.")
+
+            # Conflit d'agenda : un participant ne peut pas reserver deux evenements
+            # DIFFERENTS dont les horaires se CHEVAUCHENT. Seules les reservations
+            # CONFIRMED comptent -> annuler la concurrente libere ce creneau.
+            #
+            # Intervalle du nouvel evenement : [new_start, new_end[.
+            # En l'absence de end_date, l'evenement est traite comme ponctuel (fin = debut).
+            new_start = event.date
+            new_end = event.end_date or event.date
+
+            # Deux intervalles se chevauchent ssi  A.debut < B.fin  ET  A.fin > B.debut.
+            # On ajoute l'egalite stricte des debuts pour couvrir les evenements
+            # ponctuels (duree nulle) qui demarrent au meme instant.
+            overlap = (
+                Q(ev_start__lt=new_end, ev_end__gt=new_start)
+                | Q(ev_start=new_start)
+            )
+            conflict_exists = (
+                Reservation.objects.filter(
+                    user=user,
+                    status=Reservation.CONFIRMED,
+                )
+                .exclude(ticket_type__event=event)
+                .annotate(
+                    ev_start=F('ticket_type__event__date'),
+                    ev_end=Coalesce(
+                        'ticket_type__event__end_date',
+                        'ticket_type__event__date',
+                    ),
+                )
+                .filter(overlap)
+                .exists()
+            )
+            if conflict_exists:
+                raise ValidationError(
+                    "Vous avez déjà une réservation pour un autre événement dont l'horaire chevauche celui-ci. "
+                    "Annulez-la d'abord pour réserver cet événement."
+                )
 
             # Calculate total capacity used by checking all ticket types
             total_sold = sum(tt.sold_count for tt in event.ticket_types.all())

@@ -385,6 +385,47 @@ main {
     animation: livePulse 2s infinite;
 }
 
+.badge-category {
+    background: rgba(212,175,55,0.12);
+    color: var(--text-card-secondary);
+    border: 1px solid var(--border-subtle);
+}
+
+/* Filtre par categorie (liste des evenements) */
+.category-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.category-chip {
+    padding: 0.4rem 1.1rem;
+    border-radius: 9999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: var(--text-secondary);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    transition: all 0.25s ease;
+}
+
+.category-chip:hover {
+    color: var(--accent-light);
+    border-color: var(--border-color);
+    background: var(--accent-glow);
+}
+
+.category-chip.active {
+    color: var(--bg-primary);
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    border-color: var(--accent);
+    box-shadow: 0 4px 14px var(--accent-glow);
+}
+
 /* Formulaires */
 .form-group { margin-bottom: 1.5rem; }
 
