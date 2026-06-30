@@ -10,7 +10,60 @@
     {% endif %}
 </div>
 
-<!-- Filtres par categorie -->
+<!-- Barre de recherche + filtres -->
+<form method="get" action="{% url 'event-list' %}" class="event-toolbar">
+    <div class="search-box">
+        <span class="search-box__icon">🔍</span>
+        <input type="text" name="q" value="{{ query }}" placeholder="Rechercher un événement, un lieu...">
+        <button type="submit" class="search-box__btn">Rechercher</button>
+    </div>
+    <button type="button" class="btn btn-secondary filters-toggle {% if selected_category or selected_date or selected_location or selected_sort != 'recommended' %}active{% endif %}" id="filtersToggle">
+        <span style="font-size:1.1rem;">⚙</span> Filtres
+    </button>
+
+    <!-- Modal de filtres -->
+    <div class="modal-overlay" id="filtersPanel" hidden>
+      <div class="modal-box filters-modal">
+        <div class="modal-box__header">
+            <h3>⚙ Filtres</h3>
+            <button type="button" class="modal-box__close" id="filtersClose" aria-label="Fermer">&times;</button>
+        </div>
+        <div class="filters-panel__grid">
+            <div class="form-group">
+                <label for="f-category">🏷️ Catégorie</label>
+                <select name="category" id="f-category" class="form-control">
+                    <option value="">Toutes</option>
+                    {% for val, display in categories %}
+                        <option value="{{ val }}" {% if selected_category == val %}selected{% endif %}>{{ display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="f-date">📅 Date</label>
+                <input type="date" name="date" id="f-date" class="form-control" value="{{ selected_date }}">
+            </div>
+            <div class="form-group">
+                <label for="f-location">📍 Lieu</label>
+                <input type="text" name="location" id="f-location" class="form-control" value="{{ selected_location }}" placeholder="Ex: Abidjan">
+            </div>
+            <div class="form-group">
+                <label for="f-sort">↕️ Trier par</label>
+                <select name="sort" id="f-sort" class="form-control">
+                    <option value="recommended" {% if selected_sort == 'recommended' %}selected{% endif %}>Recommandé</option>
+                    <option value="price" {% if selected_sort == 'price' %}selected{% endif %}>Prix le plus bas</option>
+                    <option value="date" {% if selected_sort == 'date' %}selected{% endif %}>Date la plus proche</option>
+                </select>
+            </div>
+        </div>
+        <div class="filters-panel__actions">
+            <a href="{% url 'event-list' %}" class="btn btn-secondary">Réinitialiser</a>
+            <button type="submit" class="btn btn-primary">Appliquer les filtres</button>
+        </div>
+      </div>
+    </div>
+</form>
+
+<!-- Filtres par categorie (acces rapide) -->
 <div class="category-filter">
     <a href="{% url 'event-list' %}" class="category-chip {% if not selected_category %}active{% endif %}">Toutes</a>
     {% for val, display in categories %}
@@ -19,37 +72,42 @@
 </div>
 
 {% if events %}
-    <div class="grid">
+    <p class="event-count">{{ events|length }} événement{{ events|length|pluralize }} trouvé{{ events|length|pluralize }}</p>
+    <div class="event-grid">
         {% for event in events %}
-            <div class="card event-card">
-                <div>
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                        <span class="badge badge-{{ event.status|lower }}">{{ event.get_status_display }}</span>
-                        <small style="color: var(--text-secondary);">Organisé par @{{ event.organizer.username }}</small>
-                    </div>
-                    <span class="badge badge-category">{{ event.get_category_display }}</span>
-                    <h2 style="font-size: 1.35rem; font-weight: 600; margin-bottom: 0.75rem;">{{ event.title }}</h2>
-                    <p style="font-size: 0.95rem; margin-bottom: 1.25rem;">{{ event.description|truncatewords:20 }}</p>
-                </div>
-                <div>
-                    <div class="event-meta">
-                        <span>📅 {{ event.date|date:"d M Y - H:i" }}</span>
-                        <span>📍 {{ event.location }}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
-                        <span style="font-size: 0.9rem; color: var(--text-secondary);">Capacité: <strong>{{ event.max_capacity }} places</strong></span>
-                        <a href="{% url 'event-detail' event.pk %}" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">Détails</a>
-                    </div>
-                </div>
-            </div>
+            {% include 'events/_event_card.html' %}
         {% endfor %}
     </div>
 {% else %}
     <div class="card" style="text-align: center; padding: 4rem 2rem;">
-        <p style="font-size: 1.2rem; color: var(--text-secondary);">Aucun événement n'est disponible pour le moment.</p>
-        {% if user.is_authenticated and user.is_organizer_user or user.is_admin_user %}
-            <a href="{% url 'event-create' %}" class="btn btn-primary" style="margin-top: 1rem;">Créez le premier événement</a>
+        {% if query or selected_category or selected_date or selected_location %}
+            <p style="font-size: 1.2rem; color: var(--text-secondary);">Aucun événement ne correspond à votre recherche.</p>
+            <a href="{% url 'event-list' %}" class="btn btn-secondary" style="margin-top: 1rem;">Réinitialiser les filtres</a>
+        {% else %}
+            <p style="font-size: 1.2rem; color: var(--text-secondary);">Aucun événement n'est disponible pour le moment.</p>
+            {% if user.is_authenticated and user.is_organizer_user or user.is_admin_user %}
+                <a href="{% url 'event-create' %}" class="btn btn-primary" style="margin-top: 1rem;">Créez le premier événement</a>
+            {% endif %}
         {% endif %}
     </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        var toggle = document.getElementById('filtersToggle');
+        var panel = document.getElementById('filtersPanel');
+        var close = document.getElementById('filtersClose');
+        if (!toggle || !panel) return;
+
+        function open() { panel.hidden = false; document.body.style.overflow = 'hidden'; }
+        function hide() { panel.hidden = true; document.body.style.overflow = ''; }
+
+        toggle.addEventListener('click', open);
+        if (close) close.addEventListener('click', hide);
+        panel.addEventListener('click', function (e) { if (e.target === panel) hide(); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) hide(); });
+    })();
+</script>
 {% endblock %}

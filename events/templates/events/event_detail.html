@@ -34,6 +34,11 @@
 {% block content %}
 <div style="display: flex; flex-direction: column; gap: 2rem;">
     <!-- Event header card -->
+    {% if event.image %}
+        <div style="border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card); max-height: 360px;">
+            <img src="{{ event.image.url }}" alt="{{ event.title }}" style="width: 100%; height: 100%; max-height: 360px; object-fit: cover; display: block;">
+        </div>
+    {% endif %}
     <div class="card" style="position: relative; overflow: hidden;">
         <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
             <div>
@@ -42,6 +47,15 @@
                 <span id="ws-status-badge" class="websocket-status disconnected">
                     <span class="dot"></span> <span class="status-text">Hors ligne</span>
                 </span>
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'toggle-favorite' event.pk %}" style="display:inline; margin-left:0.5rem;">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button type="submit" class="btn btn-secondary" style="font-size:0.85rem; padding:0.35rem 0.9rem;">
+                            {% if user in event.favorited_by.all %}❤️ Retirer des favoris{% else %}🤍 Ajouter aux favoris{% endif %}
+                        </button>
+                    </form>
+                {% endif %}
             </div>
             {% if user.is_authenticated and user == event.organizer or user.is_admin_user %}
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">

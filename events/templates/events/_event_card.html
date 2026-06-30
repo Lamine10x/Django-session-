@@ -1,0 +1,47 @@
+{# Carte evenement reutilisable. Attend: event (avec .min_price annote). #}
+<article class="evt-card">
+    <a href="{% url 'event-detail' event.pk %}" class="evt-card__media {% if not event.image %}evt-card__media--cat-{{ event.category|lower }}{% endif %}"
+       {% if event.image %}style="background-image: url('{{ event.image.url }}');"{% endif %}>
+        <span class="evt-card__status badge badge-{{ event.status|lower }}">{{ event.get_status_display }}</span>
+        <span class="evt-card__cat">{{ event.get_category_display }}</span>
+    </a>
+
+    {% if user.is_authenticated %}
+        <form method="post" action="{% url 'toggle-favorite' event.pk %}" class="evt-card__fav-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="evt-card__fav {% if user in event.favorited_by.all %}is-active{% endif %}"
+                    title="{% if user in event.favorited_by.all %}Retirer des favoris{% else %}Ajouter aux favoris{% endif %}">
+                {% if user in event.favorited_by.all %}❤️{% else %}🤍{% endif %}
+            </button>
+        </form>
+    {% endif %}
+
+    <div class="evt-card__body">
+        <h2 class="evt-card__title">{{ event.title }}</h2>
+
+        <ul class="evt-card__meta">
+            <li>📅 {{ event.date|date:"D d M Y" }} · {{ event.date|date:"H\hi" }}</li>
+            <li class="evt-card__price">
+                {% if event.min_price is not None %}
+                    💳 À partir de <strong>{{ event.min_price }} FCFA</strong>
+                {% else %}
+                    💳 Billetterie à venir
+                {% endif %}
+            </li>
+            <li>🇨🇮 {{ event.location }}</li>
+        </ul>
+
+        <a href="{% url 'event-detail' event.pk %}" class="btn btn-primary evt-card__cta">
+            {% if event.status == 'PUBLISHED' %}Réserver{% else %}Voir les détails{% endif %}
+        </a>
+    </div>
+
+    <div class="evt-card__footer">
+        <span class="evt-card__avatar">{{ event.organizer.username|first|upper }}</span>
+        <div class="evt-card__publisher">
+            <small>Publié par</small>
+            <strong>@{{ event.organizer.username }}</strong>
+        </div>
+    </div>
+</article>

@@ -11,7 +11,7 @@
             {% if event %}Modifier l'événement{% else %}Créer un nouvel événement{% endif %}
         </h1>
         
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group">
                 <label for="title">Titre de l'événement</label>
@@ -43,6 +43,14 @@
             <div class="form-group">
                 <label for="location">Lieu / Adresse</label>
                 <input type="text" name="location" id="location" class="form-control" required placeholder="Ex: Palais de la Culture, Treichville" value="{{ event.location|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="image">Affiche / visuel {% if event and event.image %}(laisser vide pour conserver l'actuel){% endif %}</label>
+                <input type="file" name="image" id="image" class="form-control" accept="image/*">
+                {% if event and event.image %}
+                    <small style="display:block; margin-top:0.4rem;">Image actuelle : {{ event.image.name }}</small>
+                {% endif %}
             </div>
 
             <div class="form-group">

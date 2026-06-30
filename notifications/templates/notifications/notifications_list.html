@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications - EVENTPRO CI{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 1.8rem;">🔔 Mes Notifications</h1>
+
+<div class="card" style="padding: 0;">
+    {% if notifications %}
+        {% for n in notifications %}
+            <a href="{% if n.url %}{{ n.url }}{% else %}#{% endif %}" class="notif-row {% if not n.is_read %}is-unread{% endif %}">
+                <span class="notif-row__msg">{{ n.message }}</span>
+                <small class="notif-row__time">{{ n.created_at|date:"d M Y · H\hi" }}</small>
+            </a>
+        {% endfor %}
+    {% else %}
+        <p style="text-align: center; padding: 3rem; color: var(--text-card-secondary);">Aucune notification pour le moment.</p>
+    {% endif %}
+</div>
+{% endblock %}

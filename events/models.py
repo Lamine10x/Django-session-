@@ -34,6 +34,12 @@ class Event(models.Model):
 
     title = models.CharField(max_length=200, verbose_name="Titre")
     description = models.TextField(verbose_name="Description")
+    image = models.ImageField(
+        upload_to='events/',
+        null=True,
+        blank=True,
+        verbose_name="Affiche / visuel de l'événement"
+    )
     category = models.CharField(
         max_length=20,
         choices=CATEGORY_CHOICES,
@@ -59,6 +65,12 @@ class Event(models.Model):
         choices=STATUS_CHOICES,
         default=DRAFT,
         verbose_name="Statut"
+    )
+    favorited_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='favorite_events',
+        blank=True,
+        verbose_name="Favori de"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

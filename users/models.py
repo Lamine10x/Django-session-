@@ -17,7 +17,18 @@ class CustomUser(AbstractUser):
         choices=ROLE_CHOICES,
         default=PARTICIPANT,
     )
-    
+    photo = models.ImageField(
+        upload_to='avatars/',
+        null=True,
+        blank=True,
+        verbose_name="Photo de profil",
+    )
+
+    @property
+    def initials(self):
+        name = (self.first_name or self.username).strip()
+        return name[0].upper() if name else "?"
+
     def is_admin_user(self):
         return self.role == self.ADMIN or self.is_superuser
 

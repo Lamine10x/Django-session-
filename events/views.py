@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import Q, Min, F
 from .models import Event
 from .services import EventService
 
@@ -12,6 +12,15 @@ def event_list(request):
     else:
         events = Event.objects.filter(status=Event.PUBLISHED)
 
+    # Recherche plein texte (titre, description, lieu)
+    query = request.GET.get('q', '').strip()
+    if query:
+        events = events.filter(
+            Q(title__icontains=query)
+            | Q(description__icontains=query)
+            | Q(location__icontains=query)
+        )
+
     # Filtre par categorie (apprecie par le participant)
     selected_category = request.GET.get('category')
     valid_categories = [choice[0] for choice in Event.CATEGORY_CHOICES]
@@ -20,10 +29,36 @@ def event_list(request):
     else:
         selected_category = None
 
+    # Filtre par date (jour precis)
+    selected_date = request.GET.get('date', '').strip()
+    if selected_date:
+        events = events.filter(date__date=selected_date)
+
+    # Filtre par lieu
+    selected_location = request.GET.get('location', '').strip()
+    if selected_location:
+        events = events.filter(location__icontains=selected_location)
+
+    # Prix d'entree ("a partir de") pour chaque evenement
+    events = events.annotate(min_price=Min('ticket_types__price'))
+
+    # Tri
+    selected_sort = request.GET.get('sort', 'recommended')
+    if selected_sort == 'price':
+        events = events.order_by(F('min_price').asc(nulls_last=True))
+    elif selected_sort == 'date':
+        events = events.order_by('date')
+    else:
+        selected_sort = 'recommended'  # ordre par defaut (Meta: -date)
+
     return render(request, 'events/event_list.html', {
         'events': events,
         'categories': Event.CATEGORY_CHOICES,
         'selected_category': selected_category,
+        'query': query,
+        'selected_date': selected_date,
+        'selected_location': selected_location,
+        'selected_sort': selected_sort,
     })
 
 def event_detail(request, pk):
@@ -54,6 +89,7 @@ def event_create(request):
         max_capacity = request.POST.get('max_capacity')
         status_val = request.POST.get('status', Event.DRAFT)
         category = request.POST.get('category', Event.CONCERT)
+        image = request.FILES.get('image')
 
         try:
             event = EventService.create_event(
@@ -65,7 +101,8 @@ def event_create(request):
                 max_capacity=max_capacity,
                 organizer=request.user,
                 status=status_val,
-                category=category
+                category=category,
+                image=image
             )
             messages.success(request, "Événement créé avec succès !")
             return redirect('event-detail', pk=event.pk)
@@ -96,6 +133,9 @@ def event_edit(request, pk):
         if category in [choice[0] for choice in Event.CATEGORY_CHOICES]:
             event.category = category
 
+        if request.FILES.get('image'):
+            event.image = request.FILES['image']
+
         new_status = request.POST.get('status')
         try:
             EventService._validate_dates(event.date, event.end_date)
@@ -125,5 +165,25 @@ def event_status_change(request, pk, new_status):
         messages.success(request, f"Statut mis à jour : {event.get_status_display()}")
     except ValidationError as e:
         messages.error(request, str(e.message if hasattr(e, 'message') else e))
-        
+
     return redirect('event-detail', pk=event.pk)
+
+@login_required
+def toggle_favorite(request, pk):
+    event = get_object_or_404(Event, pk=pk)
+    if request.method == 'POST':
+        if event.favorited_by.filter(pk=request.user.pk).exists():
+            event.favorited_by.remove(request.user)
+            messages.info(request, f"« {event.title} » retiré de vos favoris.")
+        else:
+            event.favorited_by.add(request.user)
+            messages.success(request, f"« {event.title} » ajouté à vos favoris !")
+    next_url = request.POST.get('next')
+    if next_url:
+        return redirect(next_url)
+    return redirect('event-detail', pk=event.pk)
+
+@login_required
+def favorites_list(request):
+    events = request.user.favorite_events.annotate(min_price=Min('ticket_types__price'))
+    return render(request, 'events/favorites_list.html', {'events': events})

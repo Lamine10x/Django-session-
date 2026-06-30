@@ -2,6 +2,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.core.exceptions import ValidationError
 from django.utils.dateparse import parse_datetime
+from notifications.models import Notification
 from .models import Event
 
 class EventService:
@@ -17,7 +18,7 @@ class EventService:
 
     @staticmethod
     def create_event(title, description, date, location, max_capacity, organizer,
-                     status=Event.DRAFT, category=Event.CONCERT, end_date=None):
+                     status=Event.DRAFT, category=Event.CONCERT, end_date=None, image=None):
         if not organizer.is_organizer_user() and not organizer.is_admin_user():
             raise ValidationError("Seuls les organisateurs peuvent créer des événements.")
 
@@ -30,6 +31,7 @@ class EventService:
         event = Event.objects.create(
             title=title,
             description=description,
+            image=image or None,
             date=date,
             end_date=end_date or None,
             location=location,
@@ -64,5 +66,13 @@ class EventService:
                     "status": event.status,
                     "status_display": event.get_status_display(),
                 }
+            )
+
+        # Notifie les utilisateurs ayant mis l'evenement en favori.
+        for fan in event.favorited_by.all():
+            Notification.notify(
+                fan,
+                f"L'événement favori « {event.title} » est désormais : {event.get_status_display()}.",
+                f"/events/{event.id}/"
             )
         return event

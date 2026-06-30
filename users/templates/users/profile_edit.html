@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Mon Profil - EVENTPRO CI{% endblock %}
+
+{% block content %}
+<div style="max-width: 620px; margin: 1rem auto;">
+    <div class="card">
+        <h1 style="margin-bottom: 1.5rem;">⚙️ Modifier mon profil</h1>
+
+        <div class="profile-head">
+            {% if profile_user.photo %}
+                <img class="profile-avatar" src="{{ profile_user.photo.url }}" alt="{{ profile_user.username }}">
+            {% else %}
+                <span class="profile-avatar profile-avatar--initials">{{ profile_user.initials }}</span>
+            {% endif %}
+            <div>
+                <strong style="font-size: 1.2rem; color: var(--text-card-primary);">@{{ profile_user.username }}</strong>
+                <div style="color: var(--text-muted);">{{ profile_user.get_role_display }}</div>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" style="margin-top: 1.5rem;">
+            {% csrf_token %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label for="first_name">Prénom</label>
+                    <input type="text" name="first_name" id="first_name" class="form-control" value="{{ profile_user.first_name }}" placeholder="Votre prénom">
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Nom</label>
+                    <input type="text" name="last_name" id="last_name" class="form-control" value="{{ profile_user.last_name }}" placeholder="Votre nom">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" name="username" id="username" class="form-control" value="{{ profile_user.username }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="photo">Photo de profil</label>
+                <input type="file" name="photo" id="photo" class="form-control" accept="image/*">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.8rem;">Enregistrer les modifications</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

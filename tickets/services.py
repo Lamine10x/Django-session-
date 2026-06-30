@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from events.models import Event
+from notifications.models import Notification
 from .models import TicketType, Reservation
 
 class TicketService:
@@ -79,6 +80,17 @@ class TicketService:
 
             TicketService._send_quota_notification(event)
 
+            Notification.notify(
+                user,
+                f"Réservation confirmée pour « {event.title} » ({ticket_type.name}).",
+                "/reservations/"
+            )
+            Notification.notify(
+                event.organizer,
+                f"Nouveau billet vendu : « {event.title} » ({ticket_type.name}).",
+                "/dashboard/"
+            )
+
             return reservation
 
     @staticmethod
@@ -105,6 +117,12 @@ class TicketService:
                 ticket_type.save()
 
             TicketService._send_quota_notification(event)
+
+            Notification.notify(
+                reservation.user,
+                f"Réservation annulée pour « {event.title} ».",
+                "/reservations/"
+            )
 
             return reservation
 

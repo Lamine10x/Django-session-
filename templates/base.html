@@ -14,19 +14,76 @@
             <a href="{% url 'event-list' %}" class="logo">EVENTPRO CI</a>
             <ul class="nav-links">
                 <li><a href="{% url 'event-list' %}">Événements</a></li>
-                {% if user.is_authenticated %}
-                    {% if user.is_organizer_user or user.is_admin_user %}
-                        <li><a href="{% url 'organizer-dashboard' %}">Dashboard Organisateur</a></li>
-                        <li><a href="{% url 'event-create' %}">Créer Événement</a></li>
-                    {% endif %}
-                    <li><a href="{% url 'user-reservations' %}">Mes Réservations</a></li>
-                    <li><span style="color: var(--text-primary); font-weight: 500;">@{{ user.username }}</span></li>
-                    <li><a href="{% url 'logout' %}" class="btn btn-secondary" style="padding: 0.4rem 1rem;">Déconnexion</a></li>
-                {% else %}
-                    <li><a href="{% url 'login' %}">Connexion</a></li>
-                    <li><a href="{% url 'register' %}" class="btn btn-primary" style="padding: 0.4rem 1rem;">S'inscrire</a></li>
-                {% endif %}
             </ul>
+
+            <div class="nav-actions">
+                {% if user.is_authenticated %}
+                    <!-- Cloche : notifications -->
+                    <div class="nav-menu" data-menu>
+                        <button type="button" class="nav-icon" data-menu-toggle aria-label="Notifications">
+                            🔔
+                            {% if unread_notifications_count %}<span class="nav-badge">{{ unread_notifications_count }}</span>{% endif %}
+                        </button>
+                        <div class="nav-dropdown" data-menu-panel hidden>
+                            <div class="nav-dropdown__title">Notifications</div>
+                            {% for n in recent_notifications %}
+                                <a href="{% url 'notification-open' n.pk %}" class="nav-dropdown__item {% if not n.is_read %}is-unread{% endif %}">
+                                    <span>{{ n.message }}</span>
+                                    <small>{{ n.created_at|timesince }}</small>
+                                </a>
+                            {% empty %}
+                                <div class="nav-dropdown__empty">Aucune notification</div>
+                            {% endfor %}
+                            <a href="{% url 'notifications-list' %}" class="nav-dropdown__foot">Tout voir</a>
+                        </div>
+                    </div>
+
+                    <!-- Coeur : favoris -->
+                    <a href="{% url 'favorites-list' %}" class="nav-icon" aria-label="Favoris" title="Mes favoris">
+                        ❤️
+                        {% if favorites_count %}<span class="nav-badge nav-badge--gold">{{ favorites_count }}</span>{% endif %}
+                    </a>
+
+                    <!-- Menu utilisateur : hamburger + silhouette -->
+                    <div class="nav-menu" data-menu>
+                        <button type="button" class="nav-user" data-menu-toggle aria-label="Menu utilisateur">
+                            <span class="nav-user__lines">&#9776;</span>
+                            {% if user.photo %}
+                                <img class="nav-avatar" src="{{ user.photo.url }}" alt="{{ user.username }}">
+                            {% else %}
+                                <span class="nav-avatar nav-avatar--initials">{{ user.initials }}</span>
+                            {% endif %}
+                        </button>
+                        <div class="nav-dropdown nav-dropdown--right" data-menu-panel hidden>
+                            <div class="nav-dropdown__user">
+                                {% if user.photo %}
+                                    <img class="nav-avatar nav-avatar--lg" src="{{ user.photo.url }}" alt="{{ user.username }}">
+                                {% else %}
+                                    <span class="nav-avatar nav-avatar--initials nav-avatar--lg">{{ user.initials }}</span>
+                                {% endif %}
+                                <div>
+                                    <strong>@{{ user.username }}</strong>
+                                    <small>{{ user.get_role_display }}</small>
+                                </div>
+                            </div>
+                            {% if user.is_organizer_user or user.is_admin_user %}
+                                <a href="{% url 'organizer-dashboard' %}" class="nav-dropdown__item">📊 Dashboard organisateur</a>
+                                <a href="{% url 'event-create' %}" class="nav-dropdown__item">➕ Créer un événement</a>
+                            {% endif %}
+                            <a href="{% url 'user-reservations' %}" class="nav-dropdown__item">🎟️ Mes réservations</a>
+                            <a href="{% url 'favorites-list' %}" class="nav-dropdown__item">❤️ Mes favoris</a>
+                            <a href="{% url 'profile-edit' %}" class="nav-dropdown__item">⚙️ Modifier mon profil</a>
+                            {% if user.is_admin_user %}
+                                <a href="/admin/" class="nav-dropdown__item">🛠️ Administration</a>
+                            {% endif %}
+                            <a href="{% url 'logout' %}" class="nav-dropdown__item nav-dropdown__item--danger">🚪 Se déconnecter</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-link-plain">Connexion</a>
+                    <a href="{% url 'register' %}" class="btn btn-primary" style="padding: 0.4rem 1rem;">S'inscrire</a>
+                {% endif %}
+            </div>
         </nav>
     </header>
 
@@ -47,6 +104,34 @@
     <footer>
         <p>&copy; 2026 EVENTPRO CI — La réservation de tes plans en chap.</p>
     </footer>
+
+    <script>
+        (function () {
+            var menus = document.querySelectorAll('[data-menu]');
+            function closeAll(except) {
+                menus.forEach(function (m) {
+                    if (m !== except) {
+                        var p = m.querySelector('[data-menu-panel]');
+                        if (p) p.hidden = true;
+                        m.classList.remove('open');
+                    }
+                });
+            }
+            menus.forEach(function (menu) {
+                var toggle = menu.querySelector('[data-menu-toggle]');
+                var panel = menu.querySelector('[data-menu-panel]');
+                if (!toggle || !panel) return;
+                toggle.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var willOpen = panel.hidden;
+                    closeAll(menu);
+                    panel.hidden = !willOpen;
+                    menu.classList.toggle('open', willOpen);
+                });
+            });
+            document.addEventListener('click', function () { closeAll(null); });
+        })();
+    </script>
 
     {% block extra_js %}{% endblock %}
 </body>
