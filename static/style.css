@@ -799,6 +799,9 @@ main {
 .evt-card__media--cat-charity      { background-image: linear-gradient(135deg, #5c0f24 0%, #07142a 100%); }
 .evt-card__media--cat-leisure      { background-image: linear-gradient(135deg, #0a4a40 0%, #07142a 100%); }
 .evt-card__media--cat-culinary     { background-image: linear-gradient(135deg, #6b500a 0%, #07142a 100%); }
+.evt-card__media--cat-religious    { background-image: linear-gradient(135deg, #1a3a5c 0%, #07142a 100%); }
+.evt-card__media--cat-tourism      { background-image: linear-gradient(135deg, #0a5c5c 0%, #07142a 100%); }
+.evt-card__media--cat-festivity    { background-image: linear-gradient(135deg, #5c0a4a 0%, #07142a 100%); }
 
 /* Corps */
 .evt-card__body {
@@ -962,6 +965,89 @@ tr:hover td { background: #f8fafc; color: var(--text-card-primary); }
 .alert-error, .alert-danger { background: rgba(107,15,36,0.14); color: #fca5a5; border-color: var(--danger); }
 .alert-warning { background: rgba(217,119,6,0.14); color: #fde047; border-color: var(--warning); }
 .alert-info    { background: rgba(10,74,138,0.14); color: #93c5fd; border-color: var(--info); }
+
+/* Page de paiement (Mobile Money) */
+.pay-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.3rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-md);
+}
+.pay-summary__amount { font-size: 1.5rem; font-weight: 700; color: var(--primary); white-space: nowrap; }
+
+.pay-methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.8rem;
+}
+.pay-method input { position: absolute; opacity: 0; pointer-events: none; }
+.pay-method__box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 0.8rem;
+    border: 2px solid #e2e8f0;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+.pay-method__box:hover { border-color: var(--accent); background: #fffdf6; }
+.pay-method input:checked + .pay-method__box {
+    border-color: var(--primary);
+    background: rgba(6,78,59,0.06);
+    box-shadow: 0 0 0 3px rgba(6,78,59,0.12);
+}
+.pay-method__icon { font-size: 1.8rem; }
+.pay-method__name { font-size: 0.88rem; font-weight: 600; color: var(--text-card-primary); }
+
+/* Recapitulatif dashboard organisateur */
+.dash-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 2.5rem;
+}
+
+.dash-stat {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.4rem 1.2rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.dash-stat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+.dash-stat__label {
+    display: block;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-secondary);
+    margin-bottom: 0.6rem;
+}
+
+.dash-stat__value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
 
 /* Lignes de notifications (page dediee) */
 .notif-row {

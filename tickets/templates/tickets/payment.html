@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Paiement - EVENTPRO CI{% endblock %}
+
+{% block content %}
+<div style="max-width: 620px; margin: 1rem auto;">
+    <div class="card">
+        <h1 style="margin-bottom: 0.5rem;">💳 Paiement</h1>
+        <p class="auth-subtitle" style="color: var(--text-card-secondary); margin-bottom: 1.5rem;">
+            Choisissez votre moyen de paiement pour confirmer votre billet.
+        </p>
+
+        <!-- Recapitulatif -->
+        <div class="pay-summary">
+            <div>
+                <strong style="color: var(--text-card-primary);">{{ reservation.ticket_type.event.title }}</strong>
+                <div style="color: var(--text-card-secondary); font-size: 0.9rem;">
+                    Catégorie : {{ reservation.ticket_type.name }}
+                </div>
+            </div>
+            <div class="pay-summary__amount">{{ reservation.ticket_type.price }} FCFA</div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <label style="font-weight:600; color:var(--text-card-primary); display:block; margin: 1.5rem 0 0.8rem;">Moyen de paiement</label>
+            <div class="pay-methods">
+                {% for value, display in methods %}
+                    <label class="pay-method">
+                        <input type="radio" name="method" value="{{ value }}" required {% if forloop.first %}checked{% endif %}>
+                        <span class="pay-method__box">
+                            <span class="pay-method__icon">
+                                {% if value == 'WAVE' %}🌊{% elif value == 'ORANGE' %}🟠{% elif value == 'MTN' %}🟡{% elif value == 'MOOV' %}🔵{% else %}💳{% endif %}
+                            </span>
+                            <span class="pay-method__name">{{ display }}</span>
+                        </span>
+                    </label>
+                {% endfor %}
+            </div>
+
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label for="phone_number">Numéro de téléphone (Mobile Money)</label>
+                <input type="tel" name="phone_number" id="phone_number" class="form-control" placeholder="Ex: 0700000000">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.9rem;">
+                Payer {{ reservation.ticket_type.price }} FCFA
+            </button>
+            <a href="{% url 'user-reservations' %}" class="btn btn-secondary" style="width: 100%; margin-top: 0.7rem;">Payer plus tard</a>
+        </form>
+
+        <p style="text-align:center; color:var(--text-muted); font-size:0.8rem; margin-top:1.2rem;">
+            🔒 Paiement simulé à des fins de démonstration — aucune transaction réelle.
+        </p>
+    </div>
+</div>
+{% endblock %}

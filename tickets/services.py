@@ -6,7 +6,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from events.models import Event
 from notifications.models import Notification
-from .models import TicketType, Reservation
+from .models import TicketType, Reservation, Payment
 
 class TicketService:
     @staticmethod
@@ -125,6 +125,45 @@ class TicketService:
             )
 
             return reservation
+
+    @staticmethod
+    def process_payment(user, reservation_id, method, phone_number=""):
+        """Simule un paiement Mobile Money / carte et confirme la reservation."""
+        with transaction.atomic():
+            try:
+                reservation = Reservation.objects.select_for_update().get(id=reservation_id, user=user)
+            except Reservation.DoesNotExist:
+                raise ValidationError("Réservation introuvable.")
+
+            if reservation.status == Reservation.CANCELLED:
+                raise ValidationError("Cette réservation est annulée.")
+
+            if reservation.payment_status == Reservation.PAID:
+                raise ValidationError("Cette réservation est déjà payée.")
+
+            valid_methods = [m[0] for m in Payment.METHOD_CHOICES]
+            if method not in valid_methods:
+                raise ValidationError("Moyen de paiement invalide.")
+
+            # Paiement simule : toujours reussi (pas de passerelle reelle).
+            payment = Payment.objects.create(
+                reservation=reservation,
+                method=method,
+                phone_number=phone_number,
+                amount=reservation.ticket_type.price,
+                is_successful=True,
+            )
+
+            reservation.payment_status = Reservation.PAID
+            reservation.save()
+
+            event = reservation.ticket_type.event
+            Notification.notify(
+                user,
+                f"Paiement confirmé ({payment.get_method_display()}) pour « {event.title} ».",
+                "/reservations/"
+            )
+            return payment
 
     @staticmethod
     def _send_quota_notification(event):

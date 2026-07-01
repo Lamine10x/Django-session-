@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from events.models import Event
-from .models import TicketType, Reservation
+from .models import TicketType, Reservation, Payment
 from .services import TicketService
 
 @login_required
@@ -42,13 +42,39 @@ def book_ticket_view(request, ticket_type_id):
     ticket_type = get_object_or_404(TicketType, pk=ticket_type_id)
     if request.method == 'POST':
         try:
-            reservation = TicketService.book_ticket(request.user, ticket_type.id)
-            messages.success(request, f"Réservation confirmée ! Code du billet : {reservation.ticket_code}")
+            # La reservation est creee EN ATTENTE de paiement.
+            reservation = TicketService.book_ticket(
+                request.user, ticket_type.id, payment_status=Reservation.PENDING
+            )
+            messages.info(request, "Réservation enregistrée. Finalisez le paiement pour confirmer votre billet.")
+            return redirect('payment', reservation_id=reservation.id)
+        except ValidationError as e:
+            messages.error(request, str(e.message if hasattr(e, 'message') else e))
+
+    return redirect('event-detail', pk=ticket_type.event.pk)
+
+@login_required
+def payment_view(request, reservation_id):
+    reservation = get_object_or_404(Reservation, pk=reservation_id, user=request.user)
+
+    if reservation.payment_status == Reservation.PAID:
+        messages.info(request, "Cette réservation est déjà payée.")
+        return redirect('user-reservations')
+
+    if request.method == 'POST':
+        method = request.POST.get('method')
+        phone = request.POST.get('phone_number', '')
+        try:
+            payment = TicketService.process_payment(request.user, reservation.id, method, phone)
+            messages.success(request, f"Paiement réussi ! Référence : {payment.reference}")
             return redirect('user-reservations')
         except ValidationError as e:
             messages.error(request, str(e.message if hasattr(e, 'message') else e))
-            
-    return redirect('event-detail', pk=ticket_type.event.pk)
+
+    return render(request, 'tickets/payment.html', {
+        'reservation': reservation,
+        'methods': Payment.METHOD_CHOICES,
+    })
 
 @login_required
 def cancel_reservation_view(request, reservation_id):
@@ -70,21 +96,49 @@ def organizer_dashboard(request):
         return redirect('event-list')
         
     events = Event.objects.filter(organizer=request.user)
-    
+
     events_stats = []
+    global_revenue = 0
+    global_sold = 0
+    global_confirmed = 0
+    global_pending = 0
+
     for event in events:
         ticket_types = event.ticket_types.all()
         total_sold = sum(tt.sold_count for tt in ticket_types)
         revenue = sum(tt.sold_count * tt.price for tt in ticket_types)
-        
-        reservations = Reservation.objects.filter(ticket_type__event=event).order_by('-created_at')
-        
+
+        reservations = Reservation.objects.filter(
+            ticket_type__event=event
+        ).select_related('user', 'ticket_type').order_by('-created_at')
+
+        confirmed = reservations.filter(status=Reservation.CONFIRMED)
+        pending_count = confirmed.filter(payment_status=Reservation.PENDING).count()
+
         events_stats.append({
             'event': event,
             'ticket_types': ticket_types,
             'total_sold': total_sold,
             'revenue': revenue,
             'reservations': reservations,
+            'confirmed_count': confirmed.count(),
+            'pending_count': pending_count,
         })
-        
-    return render(request, 'tickets/organizer_dashboard.html', {'events_stats': events_stats})
+
+        global_revenue += revenue
+        global_sold += total_sold
+        global_confirmed += confirmed.count()
+        global_pending += pending_count
+
+    summary = {
+        'total_events': events.count(),
+        'global_revenue': global_revenue,
+        'global_sold': global_sold,
+        'global_confirmed': global_confirmed,
+        'global_pending': global_pending,
+    }
+
+    return render(request, 'tickets/organizer_dashboard.html', {
+        'events_stats': events_stats,
+        'summary': summary,
+    })

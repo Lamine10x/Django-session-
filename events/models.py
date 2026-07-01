@@ -21,6 +21,9 @@ class Event(models.Model):
     CHARITY = 'CHARITY'
     LEISURE = 'LEISURE'
     CULINARY = 'CULINARY'
+    RELIGIOUS = 'RELIGIOUS'
+    TOURISM = 'TOURISM'
+    FESTIVITY = 'FESTIVITY'
 
     CATEGORY_CHOICES = [
         (CONCERT, 'Concert'),
@@ -30,6 +33,9 @@ class Event(models.Model):
         (CHARITY, 'Charité'),
         (LEISURE, 'Sortie détente'),
         (CULINARY, 'Festival culinaire'),
+        (RELIGIOUS, 'Religieux'),
+        (TOURISM, 'Tourisme'),
+        (FESTIVITY, 'Fêtes'),
     ]
 
     title = models.CharField(max_length=200, verbose_name="Titre")

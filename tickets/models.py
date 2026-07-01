@@ -69,3 +69,34 @@ class Reservation(models.Model):
 
     def __str__(self):
         return f"Réservation {self.ticket_code} - {self.user.username}"
+
+class Payment(models.Model):
+    WAVE = 'WAVE'
+    ORANGE = 'ORANGE'
+    MTN = 'MTN'
+    MOOV = 'MOOV'
+    CARD = 'CARD'
+
+    METHOD_CHOICES = [
+        (WAVE, 'Wave'),
+        (ORANGE, 'Orange Money'),
+        (MTN, 'MTN MoMo'),
+        (MOOV, 'Moov Money (Flooz)'),
+        (CARD, 'Carte bancaire'),
+    ]
+
+    reservation = models.OneToOneField(
+        Reservation,
+        on_delete=models.CASCADE,
+        related_name='payment',
+        verbose_name="Réservation"
+    )
+    method = models.CharField(max_length=20, choices=METHOD_CHOICES, verbose_name="Moyen de paiement")
+    phone_number = models.CharField(max_length=20, blank=True, verbose_name="Numéro")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Montant")
+    reference = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, verbose_name="Référence transaction")
+    is_successful = models.BooleanField(default=False, verbose_name="Paiement réussi")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Paiement {self.reference} - {self.get_method_display()} ({self.amount} FCFA)"

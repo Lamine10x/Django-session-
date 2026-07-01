@@ -3,7 +3,33 @@
 {% block title %}Tableau de Bord - EVENTPRO CI{% endblock %}
 
 {% block content %}
-<h1 style="margin-bottom: 2rem;">Tableau de Bord Organisateur</h1>
+<h1 style="margin-bottom: 1.5rem;">Tableau de Bord Organisateur</h1>
+
+<!-- Recapitulatif global -->
+<div class="dash-summary">
+    <div class="dash-stat">
+        <span class="dash-stat__label">Événements</span>
+        <strong class="dash-stat__value">{{ summary.total_events }}</strong>
+    </div>
+    <div class="dash-stat">
+        <span class="dash-stat__label">Billets vendus</span>
+        <strong class="dash-stat__value" style="color: var(--accent);">{{ summary.global_sold }}</strong>
+    </div>
+    <div class="dash-stat">
+        <span class="dash-stat__label">Recettes totales</span>
+        <strong class="dash-stat__value" style="color: #34d399;">{{ summary.global_revenue }} FCFA</strong>
+    </div>
+    <div class="dash-stat">
+        <span class="dash-stat__label">Réservations confirmées</span>
+        <strong class="dash-stat__value">{{ summary.global_confirmed }}</strong>
+    </div>
+    {% if summary.global_pending %}
+        <div class="dash-stat">
+            <span class="dash-stat__label">Paiements en attente</span>
+            <strong class="dash-stat__value" style="color: var(--warning);">{{ summary.global_pending }}</strong>
+        </div>
+    {% endif %}
+</div>
 
 {% if events_stats %}
     <div style="display: flex; flex-direction: column; gap: 3rem;">

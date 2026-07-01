@@ -10,7 +10,8 @@ from .views import (
     ticket_type_create,
     book_ticket_view,
     cancel_reservation_view,
-    organizer_dashboard
+    organizer_dashboard,
+    payment_view,
 )
 
 urlpatterns = [
@@ -18,6 +19,7 @@ urlpatterns = [
     path('reservations/', user_reservations, name='user-reservations'),
     path('event/<int:event_pk>/ticket-type/new/', ticket_type_create, name='ticket-type-create'),
     path('ticket-type/<int:ticket_type_id>/book/', book_ticket_view, name='book-ticket'),
+    path('reservation/<int:reservation_id>/payment/', payment_view, name='payment'),
     path('reservation/<int:reservation_id>/cancel/', cancel_reservation_view, name='cancel-reservation'),
     path('dashboard/', organizer_dashboard, name='organizer-dashboard'),
 
