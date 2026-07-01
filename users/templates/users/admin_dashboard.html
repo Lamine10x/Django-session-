@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Back-office - EVENTPRO CI{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 0.4rem;">🛡️ Back-office Administrateur</h1>
+<p style="color: var(--text-secondary); margin-bottom: 2rem;">Vue d'ensemble de la plateforme EVENTPRO CI.</p>
+
+<!-- Indicateurs financiers -->
+<div class="dash-summary">
+    <div class="dash-stat">
+        <span class="dash-stat__label">Recettes encaissées</span>
+        <strong class="dash-stat__value" style="color: #34d399;">{{ paid_revenue }} F</strong>
+    </div>
+    <div class="dash-stat">
+        <span class="dash-stat__label">Commission ({{ commission_pct }}%)</span>
+        <strong class="dash-stat__value" style="color: var(--accent);">{{ commission }} F</strong>
+    </div>
+    <div class="dash-stat">
+        <span class="dash-stat__label">Net organisateurs</span>
+        <strong class="dash-stat__value">{{ net_to_organizers }} F</strong>
+    </div>
+    <div class="dash-stat">
+        <span class="dash-stat__label">Paiements en attente</span>
+        <strong class="dash-stat__value" style="color: var(--warning);">{{ pending_amount }} F</strong>
+    </div>
+    <div class="dash-stat">
+        <span class="dash-stat__label">Billets vendus</span>
+        <strong class="dash-stat__value">{{ tickets_sold }}</strong>
+    </div>
+</div>
+
+<!-- Utilisateurs & Evenements -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
+    <div class="card" style="margin-bottom: 0;">
+        <h3 style="margin-bottom: 1rem;">👥 Utilisateurs ({{ users_total }})</h3>
+        <div class="admin-breakdown">
+            <div><span>Participants</span><strong>{{ users_participants }}</strong></div>
+            <div><span>Organisateurs</span><strong>{{ users_organizers }}</strong></div>
+            <div><span>Administrateurs</span><strong>{{ users_admins }}</strong></div>
+        </div>
+    </div>
+    <div class="card" style="margin-bottom: 0;">
+        <h3 style="margin-bottom: 1rem;">🎫 Événements ({{ events_total }})</h3>
+        <div class="admin-breakdown">
+            <div><span>Publiés</span><strong>{{ events_published }}</strong></div>
+            <div><span>Brouillons</span><strong>{{ events_draft }}</strong></div>
+            <div><span>Annulés</span><strong>{{ events_cancelled }}</strong></div>
+        </div>
+    </div>
+</div>
+
+<!-- Top evenements -->
+<div class="card">
+    <h3 style="margin-bottom: 1rem;">🔥 Top événements (billets vendus)</h3>
+    {% if top_events %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr><th>Événement</th><th>Organisateur</th><th>Catégorie</th><th>Statut</th><th>Vendus</th></tr>
+                </thead>
+                <tbody>
+                    {% for ev in top_events %}
+                        <tr>
+                            <td style="color: var(--text-card-primary); font-weight: 600;">{{ ev.title }}</td>
+                            <td>@{{ ev.organizer.username }}</td>
+                            <td>{{ ev.get_category_display }}</td>
+                            <td><span class="badge badge-{{ ev.status|lower }}">{{ ev.get_status_display }}</span></td>
+                            <td><strong>{{ ev.sold }}</strong></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="color: var(--text-card-secondary); font-style: italic;">Aucune vente enregistrée.</p>
+    {% endif %}
+</div>
+
+<!-- Dernieres transactions -->
+<div class="card">
+    <h3 style="margin-bottom: 1rem;">💳 Dernières transactions</h3>
+    {% if recent_payments %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr><th>Référence</th><th>Participant</th><th>Événement</th><th>Moyen</th><th>Montant</th><th>Date</th></tr>
+                </thead>
+                <tbody>
+                    {% for p in recent_payments %}
+                        <tr>
+                            <td><code style="font-size: 0.78rem; color: var(--accent);">{{ p.reference|truncatechars:12 }}</code></td>
+                            <td>@{{ p.reservation.user.username }}</td>
+                            <td>{{ p.reservation.ticket_type.event.title|truncatechars:28 }}</td>
+                            <td>{{ p.get_method_display }}</td>
+                            <td><strong>{{ p.amount }} F</strong></td>
+                            <td>{{ p.created_at|date:"d M · H\hi" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="color: var(--text-card-secondary); font-style: italic;">Aucune transaction pour le moment.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,12 +1,16 @@
+from decimal import Decimal
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.db.models import Sum, Count, Q
 from .services import UserService
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
+COMMISSION_RATE = Decimal('0.10')  # 10% (modele Tikerama)
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -84,3 +88,68 @@ def profile_edit(request):
         return redirect('profile-edit')
 
     return render(request, 'users/profile_edit.html', {'profile_user': user})
+
+@login_required
+def admin_dashboard(request):
+    if not request.user.is_admin_user():
+        messages.error(request, "Accès réservé à l'administrateur.")
+        return redirect('event-list')
+
+    # Imports locaux pour eviter les imports circulaires au chargement du module
+    from events.models import Event
+    from tickets.models import Reservation, Payment
+
+    # --- Utilisateurs ---
+    users_total = User.objects.count()
+    users_participants = User.objects.filter(role=User.PARTICIPANT).count()
+    users_organizers = User.objects.filter(role=User.ORGANIZER).count()
+    users_admins = User.objects.filter(Q(role=User.ADMIN) | Q(is_superuser=True)).distinct().count()
+
+    # --- Evenements ---
+    events_total = Event.objects.count()
+    events_published = Event.objects.filter(status=Event.PUBLISHED).count()
+    events_draft = Event.objects.filter(status=Event.DRAFT).count()
+    events_cancelled = Event.objects.filter(status=Event.CANCELLED).count()
+
+    # --- Billetterie / finances ---
+    confirmed = Reservation.objects.filter(status=Reservation.CONFIRMED)
+    tickets_sold = confirmed.count()
+
+    paid_revenue = confirmed.filter(payment_status=Reservation.PAID).aggregate(
+        t=Sum('ticket_type__price'))['t'] or Decimal('0')
+    pending_amount = confirmed.filter(payment_status=Reservation.PENDING).aggregate(
+        t=Sum('ticket_type__price'))['t'] or Decimal('0')
+
+    commission = (paid_revenue * COMMISSION_RATE).quantize(Decimal('1'))
+    net_to_organizers = paid_revenue - commission
+
+    # --- Top evenements par billets confirmes ---
+    top_events = Event.objects.annotate(
+        sold=Count('ticket_types__reservations',
+                   filter=Q(ticket_types__reservations__status=Reservation.CONFIRMED))
+    ).filter(sold__gt=0).order_by('-sold')[:5]
+
+    # --- Dernieres transactions ---
+    recent_payments = Payment.objects.select_related(
+        'reservation__user', 'reservation__ticket_type__event'
+    ).order_by('-created_at')[:8]
+
+    context = {
+        'users_total': users_total,
+        'users_participants': users_participants,
+        'users_organizers': users_organizers,
+        'users_admins': users_admins,
+        'events_total': events_total,
+        'events_published': events_published,
+        'events_draft': events_draft,
+        'events_cancelled': events_cancelled,
+        'tickets_sold': tickets_sold,
+        'paid_revenue': paid_revenue,
+        'pending_amount': pending_amount,
+        'commission': commission,
+        'net_to_organizers': net_to_organizers,
+        'commission_pct': int(COMMISSION_RATE * 100),
+        'top_events': top_events,
+        'recent_payments': recent_payments,
+    }
+    return render(request, 'users/admin_dashboard.html', context)

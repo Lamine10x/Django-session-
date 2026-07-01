@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -166,11 +167,26 @@ SIMPLE_JWT = {
 }
 
 # Channel Layers (WebSocket back-end broker)
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    },
-}
+# Redis est utilise si la variable d'environnement REDIS_URL est definie
+# (ex: redis://127.0.0.1:6379). Sinon, repli automatique sur la memoire
+# afin que l'application fonctionne meme sans serveur Redis lance.
+REDIS_URL = os.environ.get('REDIS_URL')
+
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [REDIS_URL],
+            },
+        },
+    }
+else:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
 
 # Login / Logout redirects for MVT interface
 LOGIN_URL = 'login'

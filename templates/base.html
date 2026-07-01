@@ -74,7 +74,8 @@
                             <a href="{% url 'favorites-list' %}" class="nav-dropdown__item">❤️ Mes favoris</a>
                             <a href="{% url 'profile-edit' %}" class="nav-dropdown__item">⚙️ Modifier mon profil</a>
                             {% if user.is_admin_user %}
-                                <a href="/admin/" class="nav-dropdown__item">🛠️ Administration</a>
+                                <a href="{% url 'admin-dashboard' %}" class="nav-dropdown__item">🛡️ Back-office</a>
+                                <a href="/admin/" class="nav-dropdown__item">🛠️ Django Admin</a>
                             {% endif %}
                             <a href="{% url 'logout' %}" class="nav-dropdown__item nav-dropdown__item--danger">🚪 Se déconnecter</a>
                         </div>

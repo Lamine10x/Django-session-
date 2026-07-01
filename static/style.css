@@ -1006,6 +1006,20 @@ tr:hover td { background: #f8fafc; color: var(--text-card-primary); }
 .pay-method__icon { font-size: 1.8rem; }
 .pay-method__name { font-size: 0.88rem; font-weight: 600; color: var(--text-card-primary); }
 
+/* Repartitions back-office admin */
+.admin-breakdown { display: flex; flex-direction: column; gap: 0.6rem; }
+.admin-breakdown > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.9rem;
+    background: #f8fafc;
+    border: 1px solid #eef0f4;
+    border-radius: var(--radius-sm);
+}
+.admin-breakdown span { color: var(--text-card-secondary); }
+.admin-breakdown strong { color: var(--text-card-primary); font-size: 1.15rem; }
+
 /* Recapitulatif dashboard organisateur */
 .dash-summary {
     display: grid;
