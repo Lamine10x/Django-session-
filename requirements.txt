@@ -1,8 +1,15 @@
-django>=4.2,<5.0
-djangorestframework>=3.14.0
-djangorestframework-simplejwt>=5.3.0
-daphne>=4.0.0
-channels>=4.0.0
-channels-redis>=4.1.0
-asgiref>=3.7.0
-Pillow>=10.0.0
+# EVENTPRO CI - dependances (versions testees)
+
+# Framework web & API
+Django==4.2.30
+djangorestframework==3.17.1
+djangorestframework-simplejwt==5.5.1
+
+# Temps reel (WebSocket)
+daphne==4.2.2
+channels==4.3.2
+channels-redis==4.3.0
+asgiref==3.11.1
+
+# Traitement d'images (affiches, photos de profil)
+Pillow==12.3.0

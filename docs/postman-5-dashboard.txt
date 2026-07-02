@@ -1,0 +1,525 @@
+HTTP/1.1 200 OK
+Connection: close
+Content-Type: application/json
+Vary: Accept
+Allow: GET, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 8536
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+Server: daphne
+
+[
+  {
+    "event_id": 23,
+    "event_title": "Concert de demonstration",
+    "total_tickets_sold": 0,
+    "total_revenue": 0.0,
+    "participants": []
+  },
+  {
+    "event_id": 20,
+    "event_title": "Didi B - Talents Cachés Live",
+    "total_tickets_sold": 3,
+    "total_revenue": 45000.0,
+    "participants": [
+      {
+        "id": 35,
+        "ticket_type": {
+          "id": 38,
+          "event": 20,
+          "name": "Standard",
+          "price": "10000.00",
+          "quota": 2500,
+          "sold_count": 2,
+          "remaining_tickets": 2498
+        },
+        "user": {
+          "id": 5,
+          "username": "participant2",
+          "email": "participant2@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "cee31452-d533-477a-815d-61b059ea5336",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.977732Z"
+      },
+      {
+        "id": 37,
+        "ticket_type": {
+          "id": 38,
+          "event": 20,
+          "name": "Standard",
+          "price": "10000.00",
+          "quota": 2500,
+          "sold_count": 2,
+          "remaining_tickets": 2498
+        },
+        "user": {
+          "id": 3,
+          "username": "participant1",
+          "email": "part@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "16ec3122-9779-4920-913a-e7b671de1d3f",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.998699Z"
+      },
+      {
+        "id": 36,
+        "ticket_type": {
+          "id": 39,
+          "event": 20,
+          "name": "VIP",
+          "price": "25000.00",
+          "quota": 800,
+          "sold_count": 1,
+          "remaining_tickets": 799
+        },
+        "user": {
+          "id": 6,
+          "username": "participant3",
+          "email": "participant3@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "3f0acbe4-9f5c-409c-8baa-1a4eeb3bebcb",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.987698Z"
+      }
+    ]
+  },
+  {
+    "event_id": 18,
+    "event_title": "Excursion Yamoussoukro & Basilique",
+    "total_tickets_sold": 3,
+    "total_revenue": 58000.0,
+    "participants": [
+      {
+        "id": 29,
+        "ticket_type": {
+          "id": 34,
+          "event": 18,
+          "name": "Bus + guide",
+          "price": "15000.00",
+          "quota": 120,
+          "sold_count": 2,
+          "remaining_tickets": 118
+        },
+        "user": {
+          "id": 6,
+          "username": "participant3",
+          "email": "participant3@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "a2af0d9e-c80f-4ef1-9537-fdb9feb4a9c8",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.909963Z"
+      },
+      {
+        "id": 31,
+        "ticket_type": {
+          "id": 34,
+          "event": 18,
+          "name": "Bus + guide",
+          "price": "15000.00",
+          "quota": 120,
+          "sold_count": 2,
+          "remaining_tickets": 118
+        },
+        "user": {
+          "id": 5,
+          "username": "participant2",
+          "email": "participant2@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "cddaa149-05de-47dc-9b21-1f47df3c384c",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.930970Z"
+      },
+      {
+        "id": 30,
+        "ticket_type": {
+          "id": 35,
+          "event": 18,
+          "name": "Premium + déjeuner",
+          "price": "28000.00",
+          "quota": 40,
+          "sold_count": 1,
+          "remaining_tickets": 39
+        },
+        "user": {
+          "id": 3,
+          "username": "participant1",
+          "email": "part@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "25e48828-19dd-4079-8c24-306ed2115986",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.919963Z"
+      }
+    ]
+  },
+  {
+    "event_id": 16,
+    "event_title": "Festival du Garba & Attiéké",
+    "total_tickets_sold": 3,
+    "total_revenue": 18500.0,
+    "participants": [
+      {
+        "id": 23,
+        "ticket_type": {
+          "id": 29,
+          "event": 16,
+          "name": "Standard",
+          "price": "4000.00",
+          "quota": 1500,
+          "sold_count": 1,
+          "remaining_tickets": 1499
+        },
+        "user": {
+          "id": 3,
+          "username": "participant1",
+          "email": "part@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "b9f6ce5c-f43e-49bb-b152-de16e6f0beb8",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.835963Z"
+      },
+      {
+        "id": 24,
+        "ticket_type": {
+          "id": 30,
+          "event": 16,
+          "name": "Dégustation VIP",
+          "price": "12000.00",
+          "quota": 400,
+          "sold_count": 1,
+          "remaining_tickets": 399
+        },
+        "user": {
+          "id": 5,
+          "username": "participant2",
+          "email": "participant2@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "4a75489d-c28a-4de9-bde8-fda2f4cc2e81",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.847976Z"
+      },
+      {
+        "id": 25,
+        "ticket_type": {
+          "id": 31,
+          "event": 16,
+          "name": "Étudiant",
+          "price": "2500.00",
+          "quota": 300,
+          "sold_count": 1,
+          "remaining_tickets": 299
+        },
+        "user": {
+          "id": 6,
+          "username": "participant3",
+          "email": "participant3@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "41f2a840-dcc7-4a76-8ad4-8cb37e6681b7",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.859959Z"
+      }
+    ]
+  },
+  {
+    "event_id": 14,
+    "event_title": "Gala Caritatif Espoir pour Tous",
+    "total_tickets_sold": 3,
+    "total_revenue": 200000.0,
+    "participants": [
+      {
+        "id": 17,
+        "ticket_type": {
+          "id": 25,
+          "event": 14,
+          "name": "Don solidaire",
+          "price": "25000.00",
+          "quota": 300,
+          "sold_count": 2,
+          "remaining_tickets": 298
+        },
+        "user": {
+          "id": 5,
+          "username": "participant2",
+          "email": "participant2@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "55ed309d-7e38-45d1-9165-c5c5f78edbfd",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.770930Z"
+      },
+      {
+        "id": 19,
+        "ticket_type": {
+          "id": 25,
+          "event": 14,
+          "name": "Don solidaire",
+          "price": "25000.00",
+          "quota": 300,
+          "sold_count": 2,
+          "remaining_tickets": 298
+        },
+        "user": {
+          "id": 3,
+          "username": "participant1",
+          "email": "part@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "b6f3d6cc-abc7-4db3-9140-7ccb8f3f443a",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.793927Z"
+      },
+      {
+        "id": 18,
+        "ticket_type": {
+          "id": 26,
+          "event": 14,
+          "name": "Table VIP",
+          "price": "150000.00",
+          "quota": 50,
+          "sold_count": 1,
+          "remaining_tickets": 49
+        },
+        "user": {
+          "id": 6,
+          "username": "participant3",
+          "email": "participant3@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "f6d269f2-4920-41d3-8a71-3f753a4b4f06",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.782929Z"
+      }
+    ]
+  },
+  {
+    "event_id": 12,
+    "event_title": "Marathon International d'Abidjan",
+    "total_tickets_sold": 3,
+    "total_revenue": 18000.0,
+    "participants": [
+      {
+        "id": 11,
+        "ticket_type": {
+          "id": 21,
+          "event": 12,
+          "name": "Inscription 10km",
+          "price": "5000.00",
+          "quota": 2500,
+          "sold_count": 2,
+          "remaining_tickets": 2498
+        },
+        "user": {
+          "id": 6,
+          "username": "participant3",
+          "email": "participant3@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "2a59ebc0-d580-4768-983e-0efa61117be4",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.696214Z"
+      },
+      {
+        "id": 13,
+        "ticket_type": {
+          "id": 21,
+          "event": 12,
+          "name": "Inscription 10km",
+          "price": "5000.00",
+          "quota": 2500,
+          "sold_count": 2,
+          "remaining_tickets": 2498
+        },
+        "user": {
+          "id": 5,
+          "username": "participant2",
+          "email": "participant2@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "80001cea-6aa2-4829-8ad2-11317c8f5907",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.721831Z"
+      },
+      {
+        "id": 12,
+        "ticket_type": {
+          "id": 22,
+          "event": 12,
+          "name": "Inscription 21km",
+          "price": "8000.00",
+          "quota": 1500,
+          "sold_count": 1,
+          "remaining_tickets": 1499
+        },
+        "user": {
+          "id": 3,
+          "username": "participant1",
+          "email": "part@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "0e6aa027-4cd2-40fd-a313-f407dcaac644",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.708830Z"
+      }
+    ]
+  },
+  {
+    "event_id": 10,
+    "event_title": "Magic System en Concert",
+    "total_tickets_sold": 4,
+    "total_revenue": 80000.0,
+    "participants": [
+      {
+        "id": 5,
+        "ticket_type": {
+          "id": 16,
+          "event": 10,
+          "name": "Standard",
+          "price": "5000.00",
+          "quota": 3000,
+          "sold_count": 2,
+          "remaining_tickets": 2998
+        },
+        "user": {
+          "id": 3,
+          "username": "participant1",
+          "email": "part@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "9017676f-6fdb-4e92-b5ca-26f18b1b7f45",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.618688Z"
+      },
+      {
+        "id": 41,
+        "ticket_type": {
+          "id": 16,
+          "event": 10,
+          "name": "Standard",
+          "price": "5000.00",
+          "quota": 3000,
+          "sold_count": 2,
+          "remaining_tickets": 2998
+        },
+        "user": {
+          "id": 3,
+          "username": "participant1",
+          "email": "part@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "357f1ade-3287-42db-bd94-e1b1960fcaeb",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:56:36.870551Z"
+      },
+      {
+        "id": 6,
+        "ticket_type": {
+          "id": 17,
+          "event": 10,
+          "name": "VIP",
+          "price": "20000.00",
+          "quota": 800,
+          "sold_count": 1,
+          "remaining_tickets": 799
+        },
+        "user": {
+          "id": 5,
+          "username": "participant2",
+          "email": "participant2@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "317f324c-cefe-4aff-aa5b-cbae100fbfa2",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.635685Z"
+      },
+      {
+        "id": 7,
+        "ticket_type": {
+          "id": 18,
+          "event": 10,
+          "name": "Carré Or",
+          "price": "50000.00",
+          "quota": 200,
+          "sold_count": 1,
+          "remaining_tickets": 199
+        },
+        "user": {
+          "id": 6,
+          "username": "participant3",
+          "email": "participant3@eventpro.ci",
+          "role": "PARTICIPANT",
+          "first_name": "",
+          "last_name": ""
+        },
+        "ticket_code": "065ce3d0-6631-4697-a237-ed84478dc485",
+        "status": "CONFIRMED",
+        "payment_status": "PAID",
+        "created_at": "2026-07-01T01:47:08.649718Z"
+      }
+    ]
+  }
+]

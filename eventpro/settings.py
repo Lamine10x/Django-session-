@@ -175,7 +175,8 @@ REDIS_URL = os.environ.get('REDIS_URL')
 if REDIS_URL:
     CHANNEL_LAYERS = {
         'default': {
-            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            # Couche Pub/Sub : robuste pour la diffusion aux groupes (WebSocket)
+            'BACKEND': 'channels_redis.pubsub.RedisPubSubChannelLayer',
             'CONFIG': {
                 'hosts': [REDIS_URL],
             },

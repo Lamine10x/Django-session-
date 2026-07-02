@@ -1,0 +1,107 @@
+### =========================================================
+### EVENTPRO CI - Tests API (extension VS Code "REST Client")
+### Clique sur "Send Request" (apparait au-dessus de chaque bloc).
+### Lance d'abord "Connexion (token)" : le token est reutilise
+### automatiquement dans les requetes protegees.
+### =========================================================
+
+@baseUrl = http://127.0.0.1:8000
+
+### 1) Inscription (register)
+POST {{baseUrl}}/api/register/
+Content-Type: application/json
+
+{
+  "username": "nouveau_participant",
+  "email": "nouveau@eventpro.ci",
+  "password": "Test@2025",
+  "role": "PARTICIPANT"
+}
+
+### 2) Connexion (token JWT)  -- lance CELLE-CI en premier
+# @name login
+POST {{baseUrl}}/api/token/
+Content-Type: application/json
+
+{
+  "username": "organisateur1",
+  "password": "Orga@2025"
+}
+
+### 3) Rafraichir le token
+POST {{baseUrl}}/api/token/refresh/
+Content-Type: application/json
+
+{
+  "refresh": "{{login.response.body.$.refresh}}"
+}
+
+### 4) Liste des evenements (public)
+GET {{baseUrl}}/api/events/
+
+### 5) Creer un evenement (organisateur, protege par JWT)
+POST {{baseUrl}}/api/events/
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.access}}
+
+{
+  "title": "Concert de demonstration",
+  "description": "Cree via l'API",
+  "category": "CONCERT",
+  "date": "2026-12-01T20:00:00Z",
+  "end_date": "2026-12-01T23:00:00Z",
+  "location": "Abidjan",
+  "max_capacity": 200,
+  "status": "PUBLISHED"
+}
+
+### 6) Detail d'un evenement
+GET {{baseUrl}}/api/events/1/
+
+### 7) Tableau de bord organisateur (protege)
+GET {{baseUrl}}/api/tickets/dashboard/
+Authorization: Bearer {{login.response.body.$.access}}
+
+### 8) Reserver un billet (protege) -- adapte ticket_type_id si besoin
+POST {{baseUrl}}/api/tickets/book/
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.access}}
+
+{
+  "ticket_type_id": 1
+}
+
+### 9) [Permissions] Connexion en PARTICIPANT
+# @name loginPart
+POST {{baseUrl}}/api/token/
+Content-Type: application/json
+
+{
+  "username": "participant1",
+  "password": "Part@2025"
+}
+
+### 10) [Permissions] Un PARTICIPANT tente de creer un evenement -> DOIT ETRE REFUSE
+POST {{baseUrl}}/api/events/
+Content-Type: application/json
+Authorization: Bearer {{loginPart.response.body.$.access}}
+
+{
+  "title": "Tentative interdite",
+  "description": "Un participant ne peut pas creer d'evenement",
+  "date": "2026-12-01T20:00:00Z",
+  "location": "Abidjan",
+  "max_capacity": 100
+}
+
+### 11) [Auth] Creer un evenement SANS token -> DOIT ETRE REFUSE (401)
+POST {{baseUrl}}/api/events/
+Content-Type: application/json
+
+{
+  "title": "Sans authentification",
+  "description": "Aucun token fourni",
+  "date": "2026-12-01T20:00:00Z",
+  "location": "Abidjan",
+  "max_capacity": 100
+}
